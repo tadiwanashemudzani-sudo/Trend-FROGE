@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trend Forge — AI Video Creator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">⚡ Trend Forge</div>
+  <div class="status">AI Video Studio <span class="dot"></span></div>
+</header>
+
+<main class="app">
+  <aside class="sidebar">
+    <button class="nav active" data-panel="dashboard">⌂ Dashboard</button>
+    <button class="nav" data-panel="trends">🔥 Trends</button>
+    <button class="nav" data-panel="script">✍ Script</button>
+    <button class="nav" data-panel="storyboard">🎬 Storyboard</button>
+    <button class="nav" data-panel="export">🚀 Export</button>
+  </aside>
+
+  <section class="content">
+    <div id="dashboard" class="panel active">
+      <h1>Create videos faster.</h1>
+      <p class="muted">Find an idea, generate a script, build scenes, then export.</p>
+      <div class="grid">
+        <div class="card"><div class="icon">🔥</div><h3>Trending Topics</h3><p>Discover topics worth turning into short-form videos.</p><button onclick="show('trends')">Find trends</button></div>
+        <div class="card"><div class="icon">🎵</div><h3>Viral Audio</h3><p>Keep a shortlist of audio ideas for your edits.</p><button onclick="show('trends')">Explore audio</button></div>
+        <div class="card"><div class="icon">🤖</div><h3>AI Script</h3><p>Turn an idea into a hook, scenes and voice-over.</p><button onclick="show('script')">Generate script</button></div>
+        <div class="card"><div class="icon">🎥</div><h3>Video Builder</h3><p>Organize your scenes before rendering.</p><button onclick="show('storyboard')">Open builder</button></div>
+      </div>
+    </div>
+
+    <div id="trends" class="panel">
+      <h1>Trends & Audio</h1>
+      <p class="muted">Demo discovery board — connect your preferred trend APIs later.</p>
+      <div class="list">
+        <div class="trend"><b>AI tools</b><span>High interest</span><button onclick="useIdea('3 AI tools people should know this week')">Use idea</button></div>
+        <div class="trend"><b>Money tips</b><span>Short-form friendly</span><button onclick="useIdea('5 practical ways to save money')">Use idea</button></div>
+        <div class="trend"><b>Tech hacks</b><span>Evergreen</span><button onclick="useIdea('3 smartphone tricks most people miss')">Use idea</button></div>
+      </div>
+      <h2>Audio ideas</h2>
+      <div class="audio"><span>🎵 Upbeat short-form beat</span><span>🎵 Cinematic reveal</span><span>🎵 Fast motivational loop</span></div>
+    </div>
+
+    <div id="script" class="panel">
+      <h1>AI Script Generator</h1>
+      <label>Video idea</label>
+      <textarea id="idea" placeholder="Enter a topic or choose one from Trends..."></textarea>
+      <div class="row">
+        <label>Format
+          <select id="format"><option>Shorts / TikTok</option><option>YouTube</option><option>Instagram Reel</option></select>
+        </label>
+        <label>Length
+          <select id="length"><option>30 seconds</option><option>60 seconds</option><option>90 seconds</option></select>
+        </label>
+      </div>
+      <button class="primary" onclick="generateScript()">Generate with AI</button>
+      <pre id="scriptOut" class="output">Your generated script will appear here.</pre>
+    </div>
+
+    <div id="storyboard" class="panel">
+      <h1>Storyboard</h1>
+      <p class="muted">Build the video scene by scene.</p>
+      <div id="scenes"></div>
+      <button onclick="addScene()">+ Add scene</button>
+      <button class="primary" onclick="alert('Demo render queued. Connect a video-rendering service to produce the final MP4.')">Render video</button>
+    </div>
+
+    <div id="export" class="panel">
+      <h1>Export</h1>
+      <div class="card">
+        <h3>Project ready</h3>
+        <p>Choose your destination and rendering settings.</p>
+        <div class="row">
+          <label>Resolution<select><option>1080 × 1920</option><option>1920 × 1080</option></select></label>
+          <label>Format<select><option>MP4</option><option>WebM</option></select></label>
+        </div>
+        <button class="primary" onclick="alert('Export settings saved for this prototype.')">Prepare export</button>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
