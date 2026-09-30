@@ -3,7 +3,11 @@ const panels = ["dashboard", "trends", "script", "storyboard", "export"];
 function show(id) {
 panels.forEach(panel => {
 const element = document.getElementById(panel);
-if (element) element.classList.toggle("active", panel === id);
+
+if (element) {
+  element.classList.toggle("active", panel === id);
+}
+
 });
 
 document.querySelectorAll(".nav").forEach(button => {
@@ -12,7 +16,9 @@ button.classList.toggle("active", button.dataset.panel === id);
 }
 
 document.querySelectorAll(".nav").forEach(button => {
-button.addEventListener("click", () => show(button.dataset.panel));
+button.addEventListener("click", () => {
+show(button.dataset.panel);
+});
 });
 
 /* -----------------------------
@@ -34,10 +40,18 @@ AI SCRIPT GENERATOR
 ----------------------------- */
 
 async function generateScript() {
-const idea = document.getElementById("idea").value.trim();
-const format = document.getElementById("format").value;
-const length = document.getElementById("length").value;
+const ideaElement = document.getElementById("idea");
+const formatElement = document.getElementById("format");
+const lengthElement = document.getElementById("length");
 const output = document.getElementById("scriptOut");
+
+if (!ideaElement || !output) {
+return;
+}
+
+const idea = ideaElement.value.trim();
+const format = formatElement ? formatElement.value : "Short video";
+const length = lengthElement ? lengthElement.value : "30 seconds";
 
 if (!idea) {
 output.textContent = "Please enter a video idea first.";
@@ -65,9 +79,11 @@ if (!response.ok) {
   throw new Error(data.error || "Script generation failed.");
 }
 
-output.textContent = data.script;
+output.textContent = data.script || "No script was returned.";
 
-buildStoryboardFromScript(data.script);
+if (data.script) {
+  buildStoryboardFromScript(data.script);
+}
 
 } catch (error) {
 console.error(error);
@@ -91,14 +107,19 @@ sceneNumber++;
 
 const container = document.getElementById("scenes");
 
+if (!container) {
+return;
+}
+
 const scene = document.createElement("div");
+
 scene.className = "scene";
 scene.dataset.scene = sceneNumber;
 
 scene.innerHTML = `
 <div class="scene-header">
 <strong>Scene ${sceneNumber}</strong>
-<button onclick="removeScene(this)">Remove</button>
+<button type="button" onclick="removeScene(this)">Remove</button>
 </div>
 
 <input
@@ -146,7 +167,9 @@ sceneNumber = scenes.length;
 function buildStoryboardFromScript(script) {
 const container = document.getElementById("scenes");
 
-if (!container) return;
+if (!container) {
+return;
+}
 
 container.innerHTML = "";
 sceneNumber = 0;
@@ -179,7 +202,9 @@ scenes = [
 ];
 }
 
-scenes.slice(0, 10).forEach((scene, index) => {
+scenes
+.slice(0, 10)
+.forEach(scene => {
 addScene(
 scene.replace(/^scene\s*\d*[:.-]?\s*/i, ""),
 "Create a visual scene for: ${scene}"
@@ -194,26 +219,35 @@ VIDEO GENERATION
 ----------------------------- */
 
 async function renderVideo() {
-const scenes = [...document.querySelectorAll("#scenes .scene")];
+const scenes = [
+...document.querySelectorAll("#scenes .scene")
+];
 
 if (scenes.length === 0) {
 alert("Add at least one scene before rendering.");
 return;
 }
 
+const resolutionElement = document.querySelector("#export select");
+
 const project = {
-resolution: document.querySelector("#export select")?.value || "1080 × 1920",
+resolution:
+resolutionElement?.value || "1080 × 1920",
+
 format: "MP4",
 
 scenes: scenes.map(scene => ({
-  title: scene.querySelector(".scene-title")?.value || "",
-  description: scene.querySelector(".scene-description")?.value || ""
+  title:
+    scene.querySelector(".scene-title")?.value || "",
+
+  description:
+    scene.querySelector(".scene-description")?.value || ""
 }))
 
 };
 
 const button = document.querySelector(
-'#storyboard button.primary'
+"#storyboard button.primary"
 );
 
 if (button) {
@@ -233,13 +267,19 @@ body: JSON.stringify(project)
 const data = await response.json();
 
 if (!response.ok) {
-  throw new Error(data.error || "Video generation failed.");
+  throw new Error(
+    data.error || "Video generation failed."
+  );
 }
 
 if (data.url) {
   showVideoResult(data.url);
 } else if (data.id) {
   await monitorVideo(data.id);
+} else {
+  throw new Error(
+    "The server did not return a video URL or job ID."
+  );
 }
 
 } catch (error) {
@@ -265,16 +305,21 @@ VIDEO STATUS
 async function monitorVideo(videoId) {
 show("export");
 
-const statusBox = document.getElementById("videoStatus");
+const statusBox =
+document.getElementById("videoStatus");
 
 if (statusBox) {
-statusBox.textContent = "AI is generating your video...";
+statusBox.textContent =
+"AI is generating your video...";
 }
 
 const maxAttempts = 120;
 
-for (let attempt = 0; attempt < maxAttempts; attempt++) {
-
+for (
+let attempt = 0;
+attempt < maxAttempts;
+attempt++
+) {
 await wait(5000);
 
 const response = await fetch(
@@ -284,12 +329,17 @@ const response = await fetch(
 const data = await response.json();
 
 if (!response.ok) {
-  throw new Error(data.error || "Could not check video status.");
+  throw new Error(
+    data.error ||
+    "Could not check video status."
+  );
 }
 
 if (statusBox) {
   statusBox.textContent =
-    `Video generation status: ${data.status || "processing"}...`;
+    `Video generation status: ${
+      data.status || "processing"
+    }...`;
 }
 
 if (data.url) {
@@ -302,13 +352,16 @@ if (
   data.status === "canceled"
 ) {
   throw new Error(
-    data.error || "The video generation job failed."
+    data.error ||
+    "The video generation job failed."
   );
 }
 
 }
 
-throw new Error("Video generation timed out.");
+throw new Error(
+"Video generation timed out."
+);
 }
 
 /* -----------------------------
@@ -320,10 +373,16 @@ show("export");
 
 const panel = document.getElementById("export");
 
-let result = document.getElementById("videoResult");
+if (!panel) {
+return;
+}
+
+let result =
+document.getElementById("videoResult");
 
 if (!result) {
 result = document.createElement("div");
+
 result.id = "videoResult";
 result.className = "card";
 
@@ -331,20 +390,26 @@ panel.appendChild(result);
 
 }
 
+const safeUrl = escapeAttribute(url);
+
 result.innerHTML = `
-<h3>🎉 Video ready</h3>
+<h2>🎉 Video ready</h2>
 
 <video
   controls
   playsinline
-  style="width:100%;max-width:720px;border-radius:14px;"
-  src="${escapeAttribute(url)}">
+  style="
+    width:100%;
+    max-width:720px;
+    border-radius:14px;
+  "
+  src="${safeUrl}">
 </video>
 
 <br><br>
 
 <a
-  href="${escapeAttribute(url)}"
+  href="${safeUrl}"
   target="_blank"
   rel="noopener"
   class="primary"
@@ -360,7 +425,9 @@ UTILITIES
 ----------------------------- */
 
 function wait(milliseconds) {
-return new Promise(resolve => setTimeout(resolve, milliseconds));
+return new Promise(resolve =>
+setTimeout(resolve, milliseconds)
+);
 }
 
 function escapeHTML(value) {
@@ -380,21 +447,54 @@ return escapeHTML(value);
 INITIAL PROJECT
 ----------------------------- */
 
-document.addEventListener("DOMContentLoaded", () => {
-const scenes = document.getElementById("scenes");
+document.addEventListener(
+"DOMContentLoaded",
+() => {
+const scenes =
+document.getElementById("scenes");
 
-if (scenes && scenes.children.length === 0) {
-addScene(
-"Opening Hook",
-"Create an attention-grabbing opening visual."
-);
+if (
+  scenes &&
+  scenes.children.length === 0
+) {
+  addScene(
+    "Opening Hook",
+    "Create an attention-grabbing opening visual."
+  );
 }
 
-const renderButton = document.querySelector(
-'#storyboard button.primary'
-);
+const renderButton =
+  document.querySelector(
+    "#storyboard button.primary"
+  );
 
 if (renderButton) {
-renderButton.onclick = renderVideo;
+  renderButton.onclick = renderVideo;
 }
-});
+
+}
+);
+
+
+### One important thing
+
+This fixes the **JavaScript syntax**, but there's a second issue we need to handle next.
+
+Your code calls:
+
+```text
+/api/script
+/api/video
+/api/video/{videoId}
+
+Those are backend API endpoints. GitHub Pages can host your HTML/CSS/JavaScript, but it cannot run the backend itself.
+
+So if we only upload this "app.js" to GitHub Pages, clicking Generate Script or Render Video will still fail because there is no server at "/api/script" or "/api/video".
+
+The next step is to connect Trend Forge to a real backend so that:
+
+Idea → AI script → storyboard → AI video generation → finished MP4
+
+Actually works.
+
+For now, replace your entire "app.js" with the version above and save/commit it. Then we can connect the backend without breaking the frontend.
